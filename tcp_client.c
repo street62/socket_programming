@@ -11,9 +11,10 @@ void error_handling(char* message);
 int main(int argc, char* argv[]) {
     int sock;
     struct sockaddr_in serv_addr;
-    char message[30];
+    char message[1000];
     int str_len = 0;
     int idx = 0, read_len = 0;
+    int waitIndex;
 
     if (argc != 3) {
         printf("Usage: %s <IP> <port>\n", argv[0]);
@@ -34,15 +35,17 @@ int main(int argc, char* argv[]) {
         error_handling("connect() error");
     }
 
-    while ((read_len = read(sock, &message[idx++], 1))) {
-        if (read_len == -1) {
-            error_handling("read() error!");
-        }
-        str_len += read_len;
+    for (waitIndex = 0; waitIndex < 10000000; waitIndex++) {
+        printf(" "); // busy wait
+    }
+
+    str_len = read(sock, message, sizeof(message) - 1);
+    if (str_len == -1) {
+        error_handling("read() error!");
     }
 
     printf("Message from server: %s \n", message);
-    printf("Function read call count : %d \n", str_len);
+    printf("Length of message : %d \n", str_len);
     close(sock);
 
     return 0;

@@ -10,12 +10,15 @@ void error_handling(char* message);
 int main(int argc, char* argv[]) {
     int serv_sock;
     int clnt_sock;
+    int sent_len = 0;
 
     struct sockaddr_in serv_addr;
     struct sockaddr_in clnt_addr;
     socklen_t clnt_addr_size;
 
-    char message[] = "hello world!";
+    int writeIndex;
+
+    char message[] = "this is a very long message";
 
     if (argc != 2) {
         printf("Usage : %s <port>\n", argv[0]);
@@ -24,7 +27,6 @@ int main(int argc, char* argv[]) {
 
     serv_sock = socket(PF_INET, SOCK_STREAM, 0);
 
-    
     if (serv_sock == -1) {
         error_handling("socket() error");
     }
@@ -48,7 +50,10 @@ int main(int argc, char* argv[]) {
         error_handling("accept() error");
     }
 
-    write(clnt_sock, message, sizeof(message));
+    write(clnt_sock, message, 10);
+    write(clnt_sock, message + 10, 10);
+    write(clnt_sock, message + 20, 8);
+
     close(clnt_sock);
     close(serv_sock);
     return 0;
