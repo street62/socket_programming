@@ -48,7 +48,7 @@ int main(int argc, char* argv[]) {
     clnt_addr_size = sizeof(clnt_addr);
     
     for (i = 0; i < 5; i++) {
-        clnt_sock = accept(serv_sock, (struct sockaddr*) &clnt_addr, clnt_addr_size);
+        clnt_sock = accept(serv_sock, (struct sockaddr*) &clnt_addr, &clnt_addr_size);
 
         if (clnt_sock == -1) {
             error_handling("accept() error!");
@@ -57,6 +57,7 @@ int main(int argc, char* argv[]) {
         }
 
         while ((str_len = read(clnt_sock, message, BUF_SIZE) != 0)) {
+            printf("strlen: %d\n", str_len);
             write(clnt_sock, message, str_len);
         }
 
