@@ -56,8 +56,7 @@ int main(int argc, char* argv[]) {
             printf("Conncected Client: %d\n", i + 1);
         }
 
-        while ((str_len = read(clnt_sock, message, BUF_SIZE) != 0)) {
-            printf("strlen: %d\n", str_len);
+        while ((str_len = read(clnt_sock, message, BUF_SIZE)) != 0) {
             write(clnt_sock, message, str_len);
         }
 
