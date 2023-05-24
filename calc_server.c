@@ -61,23 +61,24 @@ int main(int argc, char* argv[]) {
             printf("Conncected Client: %d\n", i + 1);
         }
 
-        while ((str_len = read(clnt_sock, input, BUF_SIZE)) != 0) {
-            const char* delim = ",";
+        str_len = read(clnt_sock, input, BUF_SIZE);
 
-            char* token = strtok(input, delim); // len of operands(str)
-            int num_len = str_to_int(token);
+        const char* delim = ",";
 
-            for (j = 0; j < num_len; j++) {
-                token = strtok(NULL, delim);
-                operands[j] = str_to_int(token);
-            }
+        char* token = strtok(input, delim); // len of operands(str)
+        int num_len = str_to_int(token);
 
-            token = strtok(NULL, delim); // operator
-            res = get_res(operands, num_len, token);
-            sprintf(output, "%d", res);
-
-            write(clnt_sock, output, strlen(output) + 1);
+        for (j = 0; j < num_len; j++) {
+            token = strtok(NULL, delim);
+            operands[j] = str_to_int(token);
+            printf("oprand %d: %d\n", j + 1, operands[j]);
         }
+
+        token = strtok(NULL, delim); // operator
+        res = get_res(operands, num_len, token);
+        sprintf(output, "%d", res);
+
+        write(clnt_sock, output, strlen(output) + 1);
 
         close(clnt_sock);
     }
@@ -97,9 +98,10 @@ int str_to_int(char* str) {
     int res = 0;
     char* cur_char = str;
 
-    while (cur_char != NULL) {
+    while (*cur_char != 0) {
         res *= 10;
         res += ((*cur_char) - '0');
+        cur_char += 1;
     }
 
     return res;
@@ -108,6 +110,9 @@ int str_to_int(char* str) {
 int get_res(int operands[], int len, char* operator) {
     int res = operands[0];
     int i;
+
+    printf("operator: %c\n", *operator);
+    printf("calculating...\n");
 
     switch (*operator)
     {
@@ -135,6 +140,8 @@ int get_res(int operands[], int len, char* operator) {
         fprintf(stderr, "get_res(): INVALID OPERATOR %s", operator);
         break;
     }
+
+    printf("res: %d\n", res);
 
     return res;
 }
