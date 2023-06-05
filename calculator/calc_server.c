@@ -9,7 +9,7 @@
 
 void error_handling(char* message);
 int str_to_int(char* str);
-int get_res(int operands[], int len, char* operator);
+int get_res(int operands[], int len, char operator);
 
 int main(int argc, char* argv[]) {
     int serv_sock;
@@ -19,13 +19,16 @@ int main(int argc, char* argv[]) {
     struct sockaddr_in clnt_addr;
     socklen_t clnt_addr_size;
 
-    char input[BUF_SIZE];
-    char output[BUF_SIZE];
-    int operands[BUF_SIZE] = { 0, };
+    int input[BUF_SIZE] = {0, };
+    int output[BUF_SIZE] = {0, };
 
     int str_len;
     int i, j;
     int res;
+
+    int operand_cnt;
+    char operator;
+    int operands[BUF_SIZE] = { 0, };
 
     if (argc != 2) {
         printf("Usage : %s <port>\n", argv[0]);
@@ -61,24 +64,23 @@ int main(int argc, char* argv[]) {
             printf("Conncected Client: %d\n", i + 1);
         }
 
-        str_len = read(clnt_sock, input, BUF_SIZE);
+        read(clnt_sock, input, sizeof(int));
+        operand_cnt = input[0];
 
-        const char* delim = ",";
+        printf("operand count : %d\n", operand_cnt);
 
-        char* token = strtok(input, delim); // len of operands(str)
-        int num_len = str_to_int(token);
+        read(clnt_sock, input + 1, sizeof(int) * (operand_cnt + 1));
 
-        for (j = 0; j < num_len; j++) {
-            token = strtok(NULL, delim);
-            operands[j] = str_to_int(token);
+        for (j = 0; j < operand_cnt; j++) {
+            operands[j] = input[1 + j];
             printf("oprand %d: %d\n", j + 1, operands[j]);
         }
 
-        token = strtok(NULL, delim); // operator
-        res = get_res(operands, num_len, token);
-        sprintf(output, "%d", res);
+        operator = input[operand_cnt + 1];
+        res = get_res(operands, operand_cnt, operator);
+        output[0] = res;
 
-        write(clnt_sock, output, strlen(output) + 1);
+        write(clnt_sock, output, BUF_SIZE);
 
         close(clnt_sock);
     }
@@ -107,14 +109,14 @@ int str_to_int(char* str) {
     return res;
 }
 
-int get_res(int operands[], int len, char* operator) {
+int get_res(int operands[], int len, char operator) {
     int res = operands[0];
     int i;
 
-    printf("operator: %c\n", *operator);
+    printf("operator: %c\n", operator);
     printf("calculating...\n");
 
-    switch (*operator)
+    switch (operator)
     {
     case '+':
         for (i = 1; i < len; i++) {
@@ -137,7 +139,7 @@ int get_res(int operands[], int len, char* operator) {
         }
         break;
     default:
-        fprintf(stderr, "get_res(): INVALID OPERATOR %s", operator);
+        fprintf(stderr, "get_res(): INVALID OPERATOR %c", operator);
         break;
     }
 

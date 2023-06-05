@@ -13,14 +13,15 @@ int str_to_int(char* str);
 int main(int argc, char* argv[]) {
     int sock;
     struct sockaddr_in serv_addr;
-    char output[BUF_SIZE];
-    char input[BUF_SIZE];
-    int str_len = 0;
-    int idx = 0, read_len = 0;
-    int waitIndex;
 
-    int operands_cnt = 0;
-    int operand_idx;
+    int output[BUF_SIZE] = {0, };
+    int input[BUF_SIZE] = {0, };
+    
+    int idx, str_len;
+
+    int operands_cnt;
+    int cur_operand;
+    char operator;
 
     if (argc != 3) {
         printf("Usage: %s <IP> <port>\n", argv[0]);
@@ -44,26 +45,29 @@ int main(int argc, char* argv[]) {
     }
 
     fputs("insert the count of operands: ", stdout);
-    fgets(output, BUF_SIZE, stdin);
+    scanf("%d", &operands_cnt);
+    *output = operands_cnt;
+ 
+    for (idx = 0; idx < operands_cnt; idx++) {
+        printf("operand %d: ", idx + 1);
+        scanf("%d", &cur_operand);
+        *(output + idx + 1) = cur_operand;
+    }
+
+    fgetc(stdin);
     
-    output[strlen(output) - 1] = ',';
-
-    fputs("insert operands(separeted by comma): ", stdout);
-    fgets(output + strlen(output), BUF_SIZE, stdin);
-
-    output[strlen(output) - 1] = ',';
-
     fputs("insert operator('+', '-', '*', '/' only): ", stdout);
-    fgets(output + strlen(output), BUF_SIZE, stdin);
+    scanf("%c", &operator);
 
-    output[strlen(output) - 1] = '\0';
+    *(output + operands_cnt + 1) = (int)operator;
 
-    write(sock, output, BUF_SIZE);
+    write(sock, output, sizeof(int) * (operands_cnt + 2));
+
+    printf("calculating...\n");
 
     str_len = read(sock, input, BUF_SIZE - 1);
-    output[str_len] = 0;
 
-    printf("Answer: %s\n", input);
+    printf("Answer: %d\n", input[0]);
 
     close(sock);
     return 0;
